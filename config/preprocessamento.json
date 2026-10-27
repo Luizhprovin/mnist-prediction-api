@@ -1,0 +1,9 @@
+{
+  "versao": "1.0",
+  "parametros": {
+    "limiar_contraste": 0.15,
+    "tamanho_interno": 20,
+    "expansao_relativa": 0.02
+  },
+  "definicao": "Parâmetros definidos no desenvolvimento; manter na avaliação das fotos reservadas."
+}

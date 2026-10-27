@@ -1,0 +1,9 @@
+{
+  "modelo": "CNN",
+  "metodo": "temperature_scaling",
+  "temperatura": 1.512362965069051,
+  "imagens_calibracao": 7000,
+  "log_loss_original_calibracao": 0.041687709177776616,
+  "log_loss_calibrada_calibracao": 0.03617923438803639,
+  "classes_previstas_preservadas": true
+}
