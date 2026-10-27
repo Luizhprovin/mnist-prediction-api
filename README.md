@@ -28,9 +28,9 @@ As versões fixadas também constam de [`requirements.txt`](requirements.txt). A
 
 ## Instalação
 
-Use **Python 3.12 de 64 bits**. Abra o terminal na pasta que contém este README e `requirements.txt`.
+Use **Python 3.12 de 64 bits**. O [TensorFlow 2.21.0](https://pypi.org/project/tensorflow/2.21.0/#files) usado pelo modelo oferece pacotes para Windows x64, Linux x64/ARM64 e macOS Apple Silicon (ARM64). Esta combinação de versões não possui pacote para Mac Intel. Abra o terminal na pasta que contém este README e `requirements.txt`.
 
-**Windows (PowerShell)**
+**Windows x64 (PowerShell)**
 
 ```powershell
 py -3.12 -m venv .venv
@@ -39,7 +39,7 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip check
 ```
 
-**macOS ou Linux**
+**macOS Apple Silicon ou Linux**
 
 ```bash
 python3.12 -m venv .venv
@@ -58,7 +58,7 @@ No Windows:
 .\.venv\Scripts\python.exe -m uvicorn mnist_api.main:app --host 127.0.0.1 --port 8000
 ```
 
-No macOS ou Linux:
+No macOS Apple Silicon ou Linux:
 
 ```bash
 .venv/bin/python -m uvicorn mnist_api.main:app --host 127.0.0.1 --port 8000
@@ -69,7 +69,7 @@ Aguarde a mensagem de inicialização completa. O servidor fica ativo enquanto e
 Com o servidor ativo, abra **outro terminal** na mesma pasta e consulte a imagem de exemplo, que contém um dígito 0 recortado de uma fotografia do experimento anterior:
 
 ```bash
-# macOS ou Linux
+# macOS Apple Silicon ou Linux
 .venv/bin/python examples/consultar.py examples/digito_0.png
 ```
 
@@ -126,7 +126,7 @@ A requisição aceita imagens codificadas de até **6 MiB** e até **12 milhões
 Instale também a dependência de teste:
 
 ```bash
-# macOS ou Linux
+# macOS Apple Silicon ou Linux
 .venv/bin/python -m pip install -r requirements-dev.txt
 TF_CPP_MIN_LOG_LEVEL=3 .venv/bin/python -m unittest discover -s tests -v
 ```
