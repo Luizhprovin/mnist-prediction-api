@@ -2,9 +2,13 @@
 
 API REST que recebe uma imagem com **um único dígito manuscrito** e devolve a classe prevista e as probabilidades das dez classes. Ela disponibiliza para outras aplicações uma CNN treinada no [projeto MNIST anterior](https://github.com/Luizhprovin/mnist-digit-classification). Os pesos e os parâmetros necessários acompanham este repositório; usar a API não exige novo treinamento.
 
+Um uso possível é transformar recortes de campos numéricos manuscritos em dados digitais para revisão e registro. A API cuida da classificação de cada dígito recortado; a localização de campos em uma página completa fica a cargo da aplicação que a consulta.
+
 ## Modelo e origem
 
 A CNN foi treinada com imagens MNIST de 28 × 28 pixels. O [notebook do experimento original](https://github.com/Luizhprovin/mnist-digit-classification/blob/8197a4e/projeto.ipynb) documenta a divisão dos dados, o treinamento, a escolha do modelo e a avaliação. Na partição de teste reservada, a CNN acertou **13.859 de 14.000 imagens**, com **98,9929% de acurácia** e **F1 ponderado de 98,9933%**. As métricas registradas estão em [`reports/metricas_teste.csv`](reports/metricas_teste.csv).
+
+As 70.000 imagens foram separadas, de forma estratificada e com semente 42, em **42.000 para treino**, **7.000 para validação**, **7.000 para calibração** e **14.000 para teste**. Para fotografias, o pré-processamento estima o fundo, destaca o traço, recorta o componente detectado, redimensiona para caber em 20 × 20 e centraliza em uma tela de 28 × 28. Os parâmetros foram definidos nas imagens de desenvolvimento do experimento anterior.
 
 O modelo serializado está em `models/cnn.keras`. A temperatura de calibração das probabilidades (**1,512363**) está em `models/calibracao_cnn.json`; os parâmetros de preparação das fotografias estão em `config/preprocessamento.json`. A aplicação carrega os três arquivos uma vez na inicialização e mantém o modelo em memória durante as requisições. O pré-processamento de imagens foi reaproveitado do projeto original.
 
@@ -76,6 +80,8 @@ Com o servidor ativo, abra **outro terminal** na mesma pasta e consulte a imagem
 
 Para consultar outra imagem, troque o caminho do arquivo. O arquivo deve conter apenas um dígito recortado. Para traço claro sobre fundo escuro, acrescente `--fundo escuro`; se a porta foi alterada, acrescente `--url http://127.0.0.1:8001/predict` com a porta escolhida. O script de exemplo usa somente a biblioteca padrão do Python.
 
+Também é possível testar pelo Swagger: abra **POST /predict → Try it out**, substitua o corpo pelo conteúdo completo de [`examples/requisicao_swagger.json`](examples/requisicao_swagger.json) e clique em **Execute**. O JSON contém uma imagem base64 válida de `examples/digito_0_swagger.png` e deve retornar o dígito 0.
+
 ## Contrato HTTP
 
 `GET /health` responde com HTTP 200 quando o serviço está ativo e a CNN reside na memória:
@@ -84,7 +90,7 @@ Para consultar outra imagem, troque o caminho do arquivo. O arquivo deve conter 
 {"status": "ok", "modelo": "CNN MNIST", "modelo_carregado": true}
 ```
 
-`POST /predict` recebe um objeto JSON. `imagem` é uma *data URL* com conteúdo base64 e tipo PNG, JPEG ou WebP; `fundo` aceita `"claro"` (padrão) ou `"escuro"`. O script `examples/consultar.py` cria esse JSON a partir de um arquivo local.
+`POST /predict` recebe um objeto JSON. `imagem` é uma *data URL* com conteúdo base64 e tipo PNG, JPEG ou WebP; `fundo` aceita `"claro"` (padrão) ou `"escuro"`. O script `examples/consultar.py` cria esse JSON a partir de um arquivo local. O exemplo abaixo mostra o formato; o arquivo `examples/requisicao_swagger.json` contém um valor executável.
 
 ```json
 {
@@ -132,6 +138,16 @@ TF_CPP_MIN_LOG_LEVEL=3 .venv/bin/python -m unittest discover -s tests -v
 ```
 
 Os testes verificam o carregamento único na inicialização, `/health`, `/docs`, a previsão com a CNN real e os códigos HTTP para entradas inválidas e falhas internas. A imagem de exemplo foi retirada da foto de desenvolvimento `IMG_7057.png` do projeto original; ela serve para uma demonstração reproduzível, sem representar uma nova estimativa de desempenho.
+
+## Solução de problemas
+
+| Sintoma | Verificação |
+|---|---|
+| O comando de criação do ambiente não encontra Python 3.12 | Confirme a instalação da versão 3.12 de 64 bits e use o comando correspondente ao sistema operacional. |
+| Falha ao importar TensorFlow no Windows por DLL ausente | Instale o [Microsoft Visual C++ Redistributable indicado pelo TensorFlow](https://www.tensorflow.org/install/pip#software_requirements) e tente novamente. |
+| O servidor informa que um artefato está ausente | Confira `models/cnn.keras`, `models/calibracao_cnn.json` e `config/preprocessamento.json` na pasta clonada. |
+| A porta 8000 está ocupada | Use outra porta no comando do Uvicorn e a mesma porta em `--url` no cliente. |
+| A API devolve 400 para uma fotografia | Envie somente um dígito recortado, com traço visível, em PNG, JPEG ou WebP. |
 
 ## Organização
 

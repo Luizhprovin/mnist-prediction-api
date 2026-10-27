@@ -2,6 +2,7 @@
 
 import base64
 from io import BytesIO
+import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
@@ -14,6 +15,7 @@ from mnist_api.main import app, criar_app
 from mnist_api.services import ServicoPredicao
 
 AMOSTRA = Path(__file__).resolve().parents[1] / "examples/digito_0.png"
+REQUISICAO_SWAGGER = AMOSTRA.parent / "requisicao_swagger.json"
 
 
 def data_url(dados: bytes) -> str:
@@ -76,6 +78,12 @@ class TesteAPI(unittest.TestCase):
         resposta = self.cliente.post(
             "/predict", json={"imagem": data_url(memoria.getvalue()), "fundo": "escuro"},
         )
+        self.assertEqual(resposta.status_code, 200)
+        self.assertEqual(resposta.json()["digito"], 0)
+
+    def test_exemplo_do_swagger_e_executavel(self):
+        exemplo = json.loads(REQUISICAO_SWAGGER.read_text(encoding="utf-8"))
+        resposta = self.cliente.post("/predict", json=exemplo)
         self.assertEqual(resposta.status_code, 200)
         self.assertEqual(resposta.json()["digito"], 0)
 
